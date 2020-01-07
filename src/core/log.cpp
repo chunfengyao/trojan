@@ -18,6 +18,7 @@
  */
 
 #include "log.h"
+#include "jni.h"
 #include <cstring>
 #include <cerrno>
 #include <stdexcept>
@@ -31,9 +32,38 @@ using namespace std;
 using namespace boost::posix_time;
 using namespace boost::asio::ip;
 
-Log::Level Log::level(INFO);
-FILE *Log::keylog(NULL);
+static JavaVM *g_JavaVM;
+Log::Level Log::level(ALL);
+FILE *Log::keylog(nullptr);
 FILE *Log::output_stream(stderr);
+static jclass jniClassRef = nullptr;
+static jmethodID writeLogMethod;
+static JNIEnv *env = nullptr;
+static bool needDetach = false;
+
+void Log::setJVMInstance(JavaVM *JavaVMInstance){
+    //save jvm instance
+    g_JavaVM = JavaVMInstance;
+    //attach thread to get jniEnv(for current thread)
+    int status = g_JavaVM->AttachCurrentThread(&env, nullptr);
+    if (status < 0){
+        needDetach = true;
+    }
+    jclass jniClass = env->FindClass("io/github/trojan_gfw/igniter/Logger");
+    jniClassRef = (jclass)env->NewGlobalRef(jniClass);
+    // Find the Java method ID - provide parameters inside () and return value (see table below for an explanation of how to encode them)
+    //notice hotfix
+    writeLogMethod = env->GetStaticMethodID(
+            jniClass, "writeLog", "(Ljava/lang/String;)V");
+    Log::DetachJVM();
+}
+
+void Log::DetachJVM() {
+    if (needDetach){
+        g_JavaVM->DetachCurrentThread();
+    }
+}
+
 
 void Log::log(const string &message, Level level) {
     if (level >= Log::level) {
@@ -44,6 +74,23 @@ void Log::log(const string &message, Level level) {
         fprintf(output_stream, "%s\n", message.c_str());
         fflush(output_stream);
 #endif // ENABLE_ANDROID_LOG
+        //push to java
+        JNIEnv *env = nullptr;
+        //attach thread to get jniEnv(for current thread)
+        int status = g_JavaVM->AttachCurrentThread(&env, nullptr);
+        if (status < 0){
+            needDetach = true;
+        }
+        // Calling the method
+
+        env->CallStaticVoidMethod(
+                jniClassRef
+                , writeLogMethod
+                , env->NewStringUTF(message.c_str())
+        );
+        Log::DetachJVM();
+        //free env reference
+//        env = nullptr;
     }
 }
 
@@ -91,5 +138,12 @@ void Log::reset() {
     if (keylog != NULL) {
         fclose(keylog);
         keylog = NULL;
+    }
+}
+
+void Log::checkErr() {
+    if(env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
     }
 }

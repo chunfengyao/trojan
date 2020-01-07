@@ -23,6 +23,7 @@
 #include <cstdio>
 #include <string>
 #include <boost/asio/ip/tcp.hpp>
+#include <jni.h>
 
 #ifdef ERROR // windows.h
 #undef ERROR
@@ -40,6 +41,8 @@ public:
     };
     static Level level;
     static FILE *keylog;
+    static void setJVMInstance(JavaVM *JavaVMInstance);
+    static void DetachJVM();
     static void log(const std::string &message, Level level = ALL);
     static void log_with_date_time(const std::string &message, Level level = ALL);
     static void log_with_endpoint(const boost::asio::ip::tcp::endpoint &endpoint, const std::string &message, Level level = ALL);
@@ -48,6 +51,7 @@ public:
     static void reset();
 private:
     static FILE *output_stream;
+    static void checkErr();
 };
 
 #endif // _LOG_H_
