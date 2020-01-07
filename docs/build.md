@@ -8,7 +8,7 @@ Install these dependencies before you build (note that the test has some [additi
 
 - [CMake](https://cmake.org/) >= 3.7.2
 - [Boost](http://www.boost.org/) >= 1.66.0
-- [OpenSSL](https://www.openssl.org/) >= 1.0.2
+- [OpenSSL](https://www.openssl.org/) >= 1.1.0
 - [libmysqlclient](https://dev.mysql.com/downloads/connector/c/)
 
 For Debian users, run `sudo apt -y install build-essential cmake libboost-system-dev libboost-program-options-dev libssl-dev default-libmysqlclient-dev` to install all the necessary dependencies.
@@ -48,9 +48,15 @@ The `cmake ..` command can be extended with the following options:
 - `ENABLE_NAT` (Only on Linux)
     - `-DENABLE_NAT=ON`: build with NAT support (default).
     - `-DENABLE_NAT=OFF`: build without NAT support.
+- `ENABLE_REUSE_PORT` (Only on Linux)
+    - `-DENABLE_REUSE_PORT=ON`: build with TCP_REUSEPORT support (default).
+    - `-DENABLE_REUSE_PORT=OFF`: build without TCP_REUSEPORT support.
 - `ENABLE_SSL_KEYLOG` (OpenSSL >= 1.1.1)
     - `-DENABLE_SSL_KEYLOG=ON`: build with SSL KeyLog support (default).
     - `-DENABLE_SSL_KEYLOG=OFF`: build without SSL KeyLog support.
+- `ENABLE_TLS13_CIPHERSUITES` (OpenSSL >= 1.1.1)
+    - `-DENABLE_TLS13_CIPHERSUITES=ON`: build with TLS1.3 ciphersuites customize support (default).
+    - `-DENABLE_TLS13_CIPHERSUITES=OFF`: build without TLS1.3 ciphersuites customize support.
 - `FORCE_TCP_FASTOPEN`
     - `-DFORCE_TCP_FASTOPEN=ON`: force build with TCP_FASTOPEN support.
     - `-DFORCE_TCP_FASTOPEN=OFF`: build with TCP_FASTOPEN support based on system capabilities (default).

@@ -114,6 +114,16 @@ int main(int argc, const char *argv[]) {
 #else // ENABLE_NAT
             Log::log("[Disabled] NAT Support", Log::FATAL);
 #endif // ENABLE_NAT
+#ifdef ENABLE_TLS13_CIPHERSUITES
+            Log::log(" [Enabled] TLS1.3 Ciphersuites Support", Log::FATAL);
+#else // ENABLE_TLS13_CIPHERSUITES
+            Log::log("[Disabled] TLS1.3 Ciphersuites Support", Log::FATAL);
+#endif // ENABLE_TLS13_CIPHERSUITES
+#ifdef ENABLE_REUSE_PORT
+            Log::log(" [Enabled] TCP Port Reuse Support", Log::FATAL);
+#else // ENABLE_REUSE_PORT
+            Log::log("[Disabled] TCP Port Reuse Support", Log::FATAL);
+#endif // ENABLE_REUSE_PORT
             Log::log("OpenSSL Information", Log::FATAL);
             if (OpenSSL_version_num() != OPENSSL_VERSION_NUMBER) {
                 Log::log(string("\tCompile-time Version: ") + OPENSSL_VERSION_TEXT, Log::FATAL);

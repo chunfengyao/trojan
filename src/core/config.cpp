@@ -1,7 +1,7 @@
 /*
  * This file is part of the trojan project.
  * Trojan is an unidentifiable mechanism that helps you bypass GFW.
- * Copyright (C) 2017-2019  GreaterFire
+ * Copyright (C) 2017-2019  GreaterFire, ffftwo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,10 @@ void Config::populate(const ptree &tree) {
         run_type = FORWARD;
     } else if (rt == "nat") {
         run_type = NAT;
-    } else {
+    } else if (rt == "client") {
         run_type = CLIENT;
+    } else {
+        throw runtime_error("wrong run_type in config file");
     }
     local_addr = tree.get("local_addr", string());
     local_port = tree.get("local_port", uint16_t());
@@ -69,6 +71,7 @@ void Config::populate(const ptree &tree) {
     ssl.key = tree.get("ssl.key", string());
     ssl.key_password = tree.get("ssl.key_password", string());
     ssl.cipher = tree.get("ssl.cipher", string());
+    ssl.cipher_tls13 = tree.get("ssl.cipher_tls13", string());
     ssl.prefer_server_cipher = tree.get("ssl.prefer_server_cipher", true);
     ssl.sni = tree.get("ssl.sni", string());
     ssl.alpn = "";
@@ -86,6 +89,7 @@ void Config::populate(const ptree &tree) {
     tcp.prefer_ipv4 = tree.get("tcp.prefer_ipv4", false);
     tcp.no_delay = tree.get("tcp.no_delay", true);
     tcp.keep_alive = tree.get("tcp.keep_alive", true);
+    tcp.reuse_port = tree.get("tcp.reuse_port", false);
     tcp.fast_open = tree.get("tcp.fast_open", false);
     tcp.fast_open_qlen = tree.get("tcp.fast_open_qlen", 20);
     mysql.enabled = tree.get("mysql.enabled", false);

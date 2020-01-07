@@ -4,6 +4,8 @@
     - Add Debian build instructions in the documentation.
 - [felixonmars](https://github.com/felixonmars)
     - Fix incorrect systemd service path in the documentation.
+- [ffftwo](https://github.com/ffftwo)
+    - Throw an exception when `run_type` is wrong.
 - [GreaterFire](https://github.com/GreaterFire)
     - Author of this project.
 - [JonathanHouten](https://github.com/JonathanHouten)
@@ -25,3 +27,8 @@
     - Cancel async tasks when stopping the service.
     - Fix fd leak.
     - Print OpenSSL compile-time version and build flags.
+- [xsm1997](https://github.com/xsm1997)
+    - Add `TCP_REUSEPORT` support.
+    - Add TLS1.3 ciphersuites support.
+- [zhangsan946](https://github.com/zhangsan946)
+    - Add macOS keychain support.
