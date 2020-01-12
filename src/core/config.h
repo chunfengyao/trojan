@@ -79,12 +79,12 @@ public:
         std::string username;
         std::string password;
     } mysql;
-    void load(const std::string &filename);
+    void load();
     void populate(const std::string &JSON);
     bool sip003();
     static std::string SHA224(const std::string &message);
 private:
-    void populate(const boost::property_tree::ptree &tree);
+    void populate();
 };
 
 #endif // _CONFIG_H_

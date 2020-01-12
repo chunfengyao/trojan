@@ -49,21 +49,31 @@ void Log::setJVMInstance(JavaVM *JavaVMInstance){
     if (status < 0){
         needDetach = true;
     }
-    jclass jniClass = env->FindClass("io/github/trojan_gfw/igniter/Logger");
+    jclass jniClass = env->FindClass("com/ycf/igniter/Logger");
     jniClassRef = (jclass)env->NewGlobalRef(jniClass);
     // Find the Java method ID - provide parameters inside () and return value (see table below for an explanation of how to encode them)
     //notice hotfix
     writeLogMethod = env->GetStaticMethodID(
             jniClass, "writeLog", "(Ljava/lang/String;)V");
-    Log::DetachJVM();
+    Log::DetachJVM(false);
 }
 
-void Log::DetachJVM() {
-    if (needDetach){
+void Log::DetachJVM(bool forceDetach) {
+    if (forceDetach | needDetach){
         g_JavaVM->DetachCurrentThread();
+        needDetach = false;
     }
 }
 
+JNIEnv *Log::attachCurrentThread() {
+    JNIEnv *env = nullptr;
+    //attach thread to get jniEnv(for current thread)
+    int status = g_JavaVM->AttachCurrentThread(&env, nullptr);
+    if (status < 0){
+        needDetach = true;
+    }
+    return env;
+}
 
 void Log::log(const string &message, Level level) {
     if (level >= Log::level) {
@@ -75,20 +85,14 @@ void Log::log(const string &message, Level level) {
         fflush(output_stream);
 #endif // ENABLE_ANDROID_LOG
         //push to java
-        JNIEnv *env = nullptr;
-        //attach thread to get jniEnv(for current thread)
-        int status = g_JavaVM->AttachCurrentThread(&env, nullptr);
-        if (status < 0){
-            needDetach = true;
-        }
+        JNIEnv *env = attachCurrentThread();
         // Calling the method
-
         env->CallStaticVoidMethod(
                 jniClassRef
                 , writeLogMethod
                 , env->NewStringUTF(message.c_str())
         );
-        Log::DetachJVM();
+        Log::DetachJVM(false);
         //free env reference
 //        env = nullptr;
     }
@@ -96,7 +100,7 @@ void Log::log(const string &message, Level level) {
 
 void Log::log_with_date_time(const string &message, Level level) {
     static const char *level_strings[]= {"ALL", "INFO", "WARN", "ERROR", "FATAL", "OFF"};
-    time_facet *facet = new time_facet("[%Y-%m-%d %H:%M:%S] ");
+    time_facet *facet = new time_facet("[%m-%d %H:%M:%S] ");
     ostringstream stream;
     stream.imbue(locale(stream.getloc(), facet));
     stream << second_clock::local_time();

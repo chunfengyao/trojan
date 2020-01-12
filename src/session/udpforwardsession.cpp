@@ -58,7 +58,7 @@ void UDPForwardSession::start() {
     auto self = shared_from_this();
     resolver.async_resolve(config.remote_addr, to_string(config.remote_port), [this, self](const boost::system::error_code error, tcp::resolver::results_type results) {
         if (error) {
-            Log::log_with_endpoint(in_endpoint, "cannot resolve remote server hostname " + config.remote_addr + ": " + error.message(), Log::ERROR);
+            Log::log_with_endpoint(in_endpoint, "cannot resolve remote server hostname!", Log::ERROR);
             destroy();
             return;
         }

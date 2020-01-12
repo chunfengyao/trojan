@@ -26,78 +26,65 @@
 using namespace std;
 using namespace boost::property_tree;
 
-void Config::load(const string &filename) {
-    ptree tree;
-    read_json(filename, tree);
-    populate(tree);
+void Config::load() {
+    populate();
 }
 
 void Config::populate(const std::string &JSON) {
     istringstream s(JSON);
     ptree tree;
     read_json(s, tree);
-    populate(tree);
+    populate();
 }
 
-void Config::populate(const ptree &tree) {
-    string rt = tree.get("run_type", string("client"));
-    if (rt == "server") {
-        run_type = SERVER;
-    } else if (rt == "forward") {
-        run_type = FORWARD;
-    } else if (rt == "nat") {
-        run_type = NAT;
-    } else if (rt == "client") {
+void Config::populate() {
         run_type = CLIENT;
-    } else {
-        throw runtime_error("wrong run_type in config file");
-    }
-    local_addr = tree.get("local_addr", string());
-    local_port = tree.get("local_port", uint16_t());
-    remote_addr = tree.get("remote_addr", string());
-    remote_port = tree.get("remote_port", uint16_t());
-    target_addr = tree.get("target_addr", string());
-    target_port = tree.get("target_port", uint16_t());
+    local_addr = "127.0.0.1";
+    local_port = uint16_t(1080);
+    //remote_addr = "youHost.com";//fill your host name or ip
+    remote_port = uint16_t(22334);
+    target_addr = "";
+    target_port = 0;
     map<string, string>().swap(password);
-    for (auto& item: tree.get_child("password")) {
-        string p = item.second.get_value<string>();
+//    for (auto& item: tree.get_child("password")) {
+        //string p = "your_password";//fill your password
         password[SHA224(p)] = p;
-    }
-    udp_timeout = tree.get("udp_timeout", 60);
-    log_level = static_cast<Log::Level>(tree.get("log_level", 1));
-    ssl.verify = tree.get("ssl.verify", true);
-    ssl.verify_hostname = tree.get("ssl.verify_hostname", true);
-    ssl.cert = tree.get("ssl.cert", string());
-    ssl.key = tree.get("ssl.key", string());
-    ssl.key_password = tree.get("ssl.key_password", string());
-    ssl.cipher = tree.get("ssl.cipher", string());
-    ssl.cipher_tls13 = tree.get("ssl.cipher_tls13", string());
-    ssl.prefer_server_cipher = tree.get("ssl.prefer_server_cipher", true);
-    ssl.sni = tree.get("ssl.sni", string());
+//    }
+    udp_timeout = 60;
+    log_level = static_cast<Log::Level>(1);
+    ssl.verify = true;
+    ssl.verify_hostname = true;
+    ssl.cert = "/data/user/0/com.ycf.igniter/cache/cacert.pem";
+    ssl.key = "";
+    ssl.key_password = "";
+	//ssl.cipher = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:RSA-AES128-GCM-SHA256:RSA-AES256-GCM-SHA384:RSA-AES128-SHA:RSA-AES256-SHA:RSA-3DES-EDE-SHA";//choose your cipher best for mobile
+    ssl.cipher_tls13 = "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384";
+    ssl.prefer_server_cipher = true;
+    ssl.sni = "";
     ssl.alpn = "";
-    for (auto& item: tree.get_child("ssl.alpn")) {
-        string proto = item.second.get_value<string>();
+//    for (auto& item: tree.get_child("ssl.alpn")) {
+        string proto = "h2";
         ssl.alpn += (char)((unsigned char)(proto.length()));
         ssl.alpn += proto;
-    }
-    ssl.reuse_session = tree.get("ssl.reuse_session", true);
-    ssl.session_ticket = tree.get("ssl.session_ticket", false);
-    ssl.session_timeout = tree.get("ssl.session_timeout", long(600));
-    ssl.plain_http_response = tree.get("ssl.plain_http_response", string());
-    ssl.curves = tree.get("ssl.curves", string());
-    ssl.dhparam = tree.get("ssl.dhparam", string());
-    tcp.prefer_ipv4 = tree.get("tcp.prefer_ipv4", false);
-    tcp.no_delay = tree.get("tcp.no_delay", true);
-    tcp.keep_alive = tree.get("tcp.keep_alive", true);
-    tcp.reuse_port = tree.get("tcp.reuse_port", false);
-    tcp.fast_open = tree.get("tcp.fast_open", false);
-    tcp.fast_open_qlen = tree.get("tcp.fast_open_qlen", 20);
-    mysql.enabled = tree.get("mysql.enabled", false);
-    mysql.server_addr = tree.get("mysql.server_addr", string("127.0.0.1"));
-    mysql.server_port = tree.get("mysql.server_port", uint16_t(3306));
-    mysql.database = tree.get("mysql.database", string("trojan"));
-    mysql.username = tree.get("mysql.username", string("trojan"));
-    mysql.password = tree.get("mysql.password", string());
+//    }
+    ssl.reuse_session = true;
+    ssl.session_ticket = false;
+    ssl.session_timeout = long(600);
+    ssl.plain_http_response = "";
+    ssl.curves = "";
+    ssl.dhparam = "";
+    tcp.prefer_ipv4 = true;
+    tcp.no_delay = true;
+    tcp.keep_alive = true;
+    tcp.reuse_port = false;
+    tcp.fast_open = true;
+    tcp.fast_open_qlen = 20;
+    mysql.enabled = false;
+    mysql.server_addr = "127.0.0.1";
+    mysql.server_port = uint16_t(3306);
+    mysql.database = "trojan";
+    mysql.username = "trojan";
+    mysql.password = "";
 }
 
 bool Config::sip003() {

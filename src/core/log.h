@@ -42,16 +42,18 @@ public:
     static Level level;
     static FILE *keylog;
     static void setJVMInstance(JavaVM *JavaVMInstance);
-    static void DetachJVM();
+    static void DetachJVM(bool forceDetach);
     static void log(const std::string &message, Level level = ALL);
     static void log_with_date_time(const std::string &message, Level level = ALL);
     static void log_with_endpoint(const boost::asio::ip::tcp::endpoint &endpoint, const std::string &message, Level level = ALL);
     static void redirect(const std::string &filename);
     static void redirect_keylog(const std::string &filename);
     static void reset();
+    static JNIEnv *attachCurrentThread();
 private:
     static FILE *output_stream;
     static void checkErr();
+//    static bool needDetach;
 };
 
 #endif // _LOG_H_
